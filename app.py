@@ -184,24 +184,27 @@ def get_analytics():
         # Get average confidence score
         avg_confidence = db.session.query(func.avg(ScamCheck.confidence_score)).scalar()
         
-        # Get top categories
-        from sqlalchemy import text
-        category_query = text("""
-            SELECT category, COUNT(*) as count 
-            FROM (
-                SELECT jsonb_array_elements_text(categories) as category
-                FROM scam_check 
-                WHERE is_scam = true AND categories IS NOT NULL
-            ) t
-            GROUP BY category 
-            ORDER BY count DESC 
-            LIMIT 5
-        """)
-        
+        # Get top categories (simplified approach for JSON compatibility)
         top_categories = []
         try:
-            result = db.session.execute(category_query)
-            top_categories = [{"category": row[0], "count": row[1]} for row in result]
+            # Get all scam records with categories
+            scam_records = db.session.query(ScamCheck.categories)\
+                .filter(ScamCheck.is_scam == True)\
+                .filter(ScamCheck.categories.isnot(None))\
+                .all()
+            
+            # Count categories manually
+            category_count = {}
+            for record in scam_records:
+                if record.categories:
+                    for category in record.categories:
+                        category_count[category] = category_count.get(category, 0) + 1
+            
+            # Get top 5 categories
+            top_categories = [
+                {"category": cat, "count": count} 
+                for cat, count in sorted(category_count.items(), key=lambda x: x[1], reverse=True)[:5]
+            ]
         except Exception as e:
             logger.warning(f"Could not fetch category analytics: {e}")
         
