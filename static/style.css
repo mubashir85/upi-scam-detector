@@ -1,0 +1,156 @@
+/* Custom styles for UPI Scam Detector */
+
+.sample-message {
+    cursor: pointer;
+    padding: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.sample-message:hover {
+    background-color: var(--bs-secondary-bg);
+    border-color: var(--bs-border-color-translucent);
+    transform: translateY(-1px);
+}
+
+.sample-message:active {
+    transform: translateY(0);
+}
+
+.result-badge {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}
+
+.confidence-bar {
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    background-color: var(--bs-secondary-bg);
+}
+
+.confidence-fill {
+    height: 100%;
+    transition: width 0.5s ease-in-out;
+}
+
+.confidence-low {
+    background-color: var(--bs-success);
+}
+
+.confidence-medium {
+    background-color: var(--bs-warning);
+}
+
+.confidence-high {
+    background-color: var(--bs-danger);
+}
+
+.keyword-badge {
+    display: inline-block;
+    margin: 0.125rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+    background-color: var(--bs-info-bg-subtle);
+    color: var(--bs-info-text-emphasis);
+    border: 1px solid var(--bs-info-border-subtle);
+}
+
+.category-badge {
+    display: inline-block;
+    margin: 0.125rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+    background-color: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text-emphasis);
+    border: 1px solid var(--bs-warning-border-subtle);
+}
+
+.alert-scam {
+    border-color: var(--bs-danger-border-subtle);
+    background-color: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger-text-emphasis);
+}
+
+.alert-safe {
+    border-color: var(--bs-success-border-subtle);
+    background-color: var(--bs-success-bg-subtle);
+    color: var(--bs-success-text-emphasis);
+}
+
+.api-endpoint {
+    background-color: var(--bs-dark);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.api-endpoint code {
+    color: var(--bs-info);
+}
+
+.loading-fade {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Animation for results appearing */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-enter {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .sample-message {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Focus states for accessibility */
+.sample-message:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+button:focus,
+.btn:focus {
+    box-shadow: 0 0 0 0.2rem var(--bs-primary-bg-subtle);
+}
+
+/* Custom scrollbar for code blocks */
+pre::-webkit-scrollbar {
+    height: 8px;
+}
+
+pre::-webkit-scrollbar-track {
+    background: var(--bs-secondary-bg);
+}
+
+pre::-webkit-scrollbar-thumb {
+    background: var(--bs-border-color);
+    border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-border-color-translucent);
+}

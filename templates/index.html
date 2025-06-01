@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Scam Detector API</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-5">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 mb-3">
+                        <i data-feather="shield" class="me-3"></i>
+                        UPI Scam Detector API
+                    </h1>
+                    <p class="lead text-muted">
+                        Detect scam patterns in UPI transaction messages using advanced keyword matching
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Testing Interface -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">
+                            <i data-feather="search" class="me-2"></i>
+                            Test the API
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="scamCheckForm">
+                            <div class="mb-3">
+                                <label for="messageText" class="form-label">
+                                    UPI Transaction Message
+                                </label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="messageText" 
+                                    rows="4" 
+                                    placeholder="Enter your UPI transaction message here..."
+                                    required
+                                ></textarea>
+                                <div class="form-text">
+                                    Enter the message you want to check for scam patterns
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-outline-secondary me-md-2" id="clearBtn">
+                                    <i data-feather="x" class="me-1"></i>
+                                    Clear
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="checkBtn">
+                                    <i data-feather="shield-check" class="me-1"></i>
+                                    Check for Scams
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="mt-4" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">
+                                <i data-feather="file-text" class="me-2"></i>
+                                Detection Results
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="resultContent">
+                                <!-- Results will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Checking...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Analyzing message for scam patterns...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">
+                            <i data-feather="book" class="me-2"></i>
+                            API Documentation
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>POST /check</h5>
+                                <p class="text-muted">Check a text message for scam patterns</p>
+                                
+                                <h6>Request Body:</h6>
+                                <pre class="bg-dark p-3 rounded"><code>{
+  "text": "Your UPI transaction message here"
+}</code></pre>
+                                
+                                <h6>Response:</h6>
+                                <pre class="bg-dark p-3 rounded"><code>{
+  "is_scam": true,
+  "matched_keywords": ["urgent kyc", "verify now"],
+  "matched_patterns": ["\\burgent\\s+kyc\\b"],
+  "confidence_score": 0.8,
+  "text": "original text",
+  "categories": ["kyc_scams"]
+}</code></pre>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>GET /patterns</h5>
+                                <p class="text-muted">Get all available scam patterns</p>
+                                
+                                <h5>GET /health</h5>
+                                <p class="text-muted">Health check endpoint</p>
+                                
+                                <div class="alert alert-info">
+                                    <i data-feather="info" class="me-2"></i>
+                                    <strong>Note:</strong> All endpoints return JSON responses.
+                                    The API detects common scam patterns including KYC scams,
+                                    fake prizes, job offers, and phishing attempts.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Messages for Testing -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">
+                            <i data-feather="code" class="me-2"></i>
+                            Sample Messages for Testing
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-danger">Scam Messages:</h6>
+                                <div class="sample-messages">
+                                    <div class="sample-message" data-sample="Urgent KYC update required! Your account will be blocked. Verify now: link.com">
+                                        <strong>KYC Scam:</strong> "Urgent KYC update required! Your account will be blocked. Verify now: link.com"
+                                    </div>
+                                    <div class="sample-message" data-sample="Congratulations! You won 50 lakh rupees in our lucky draw. Claim your prize now!">
+                                        <strong>Prize Scam:</strong> "Congratulations! You won 50 lakh rupees in our lucky draw. Claim your prize now!"
+                                    </div>
+                                    <div class="sample-message" data-sample="Work from home job offer! Earn 5000 per day. No investment required. Easy money guaranteed!">
+                                        <strong>Job Scam:</strong> "Work from home job offer! Earn 5000 per day. No investment required. Easy money guaranteed!"
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="text-success">Legitimate Messages:</h6>
+                                <div class="sample-messages">
+                                    <div class="sample-message" data-sample="Your UPI transaction of Rs.500 to John Doe is successful. Transaction ID: 123456789">
+                                        <strong>Normal Transaction:</strong> "Your UPI transaction of Rs.500 to John Doe is successful. Transaction ID: 123456789"
+                                    </div>
+                                    <div class="sample-message" data-sample="Payment received from ABC Company for invoice #INV001. Amount: Rs.10,000">
+                                        <strong>Business Payment:</strong> "Payment received from ABC Company for invoice #INV001. Amount: Rs.10,000"
+                                    </div>
+                                    <div class="sample-message" data-sample="Monthly salary credited to your account. Amount: Rs.25,000">
+                                        <strong>Salary Credit:</strong> "Monthly salary credited to your account. Amount: Rs.25,000"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Initialize Feather icons
+        feather.replace();
+    </script>
+</body>
+</html>
