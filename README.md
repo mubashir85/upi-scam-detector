@@ -17,6 +17,8 @@ A Flask-based REST API that detects scam patterns in UPI transaction messages us
 - **Confidence Scoring**: Provides confidence scores for detections
 - **Web Interface**: User-friendly testing interface
 - **REST API**: Clean JSON API for integration
+- **Database Storage**: PostgreSQL database for storing results and analytics
+- **Analytics**: Real-time analytics on scam detection patterns
 
 ## Quick Start
 
@@ -101,15 +103,55 @@ Get all available scam patterns for debugging.
 }
 ```
 
+### GET /analytics
+
+Get analytics about scam detection patterns.
+
+**Response:**
+```json
+{
+  "total_checks": 150,
+  "scam_detected": 45,
+  "scam_percentage": 30.0,
+  "avg_confidence_score": 0.75,
+  "top_categories": [
+    {"category": "kyc_scams", "count": 15},
+    {"category": "prize_scams", "count": 12}
+  ]
+}
+```
+
+### GET /history
+
+Get recent scam check history (supports `?limit=N` parameter).
+
+**Response:**
+```json
+{
+  "history": [
+    {
+      "id": 1,
+      "message_text": "Urgent KYC update required",
+      "is_scam": true,
+      "confidence_score": 0.8,
+      "categories": ["kyc_scams"],
+      "created_at": "2024-01-01T12:00:00"
+    }
+  ],
+  "count": 1
+}
+```
+
 ### GET /health
 
-Health check endpoint.
+Health check endpoint with database status.
 
 **Response:**
 ```json
 {
   "status": "healthy",
-  "service": "UPI Scam Detector API"
+  "service": "UPI Scam Detector API",
+  "database": "connected"
 }
 ```
 

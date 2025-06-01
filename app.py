@@ -118,6 +118,26 @@ def check_scam():
         # Perform scam detection
         result = scam_detector.check_text(transaction_text)
         
+        # Store the result in database
+        try:
+            from models import ScamCheck
+            scam_check = ScamCheck(
+                message_text=transaction_text,
+                is_scam=result['is_scam'],
+                confidence_score=result['confidence_score'],
+                matched_keywords=result['matched_keywords'],
+                matched_patterns=result['matched_patterns'],
+                categories=result['categories'],
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent')
+            )
+            db.session.add(scam_check)
+            db.session.commit()
+            logger.info(f"Saved scam check result with ID: {scam_check.id}")
+        except Exception as e:
+            logger.error(f"Failed to save to database: {str(e)}")
+            # Continue without failing the request
+        
         # Log the result
         if result['is_scam']:
             logger.warning(f"Scam detected! Matched patterns: {result['matched_patterns']}")
@@ -148,12 +168,99 @@ def get_patterns():
             "error": "Internal server error"
         }), 500
 
+@app.route('/analytics', methods=['GET'])
+def get_analytics():
+    """Get analytics about scam checks"""
+    try:
+        from models import ScamCheck
+        from sqlalchemy import func
+        
+        # Get total checks
+        total_checks = db.session.query(func.count(ScamCheck.id)).scalar()
+        
+        # Get scam count
+        scam_count = db.session.query(func.count(ScamCheck.id)).filter(ScamCheck.is_scam == True).scalar()
+        
+        # Get average confidence score
+        avg_confidence = db.session.query(func.avg(ScamCheck.confidence_score)).scalar()
+        
+        # Get top categories
+        from sqlalchemy import text
+        category_query = text("""
+            SELECT category, COUNT(*) as count 
+            FROM (
+                SELECT jsonb_array_elements_text(categories) as category
+                FROM scam_check 
+                WHERE is_scam = true AND categories IS NOT NULL
+            ) t
+            GROUP BY category 
+            ORDER BY count DESC 
+            LIMIT 5
+        """)
+        
+        top_categories = []
+        try:
+            result = db.session.execute(category_query)
+            top_categories = [{"category": row[0], "count": row[1]} for row in result]
+        except Exception as e:
+            logger.warning(f"Could not fetch category analytics: {e}")
+        
+        return jsonify({
+            "total_checks": total_checks or 0,
+            "scam_detected": scam_count or 0,
+            "scam_percentage": round((scam_count / total_checks * 100), 2) if total_checks > 0 else 0,
+            "avg_confidence_score": round(float(avg_confidence), 3) if avg_confidence else 0,
+            "top_categories": top_categories
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error retrieving analytics: {str(e)}")
+        return jsonify({
+            "error": "Internal server error"
+        }), 500
+
+@app.route('/history', methods=['GET'])
+def get_history():
+    """Get recent scam check history"""
+    try:
+        from models import ScamCheck
+        
+        # Get limit from query params (default 10, max 100)
+        limit = min(int(request.args.get('limit', 10)), 100)
+        
+        # Get recent checks
+        checks = db.session.query(ScamCheck)\
+            .order_by(ScamCheck.created_at.desc())\
+            .limit(limit)\
+            .all()
+        
+        return jsonify({
+            "history": [check.to_dict() for check in checks],
+            "count": len(checks)
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error retrieving history: {str(e)}")
+        return jsonify({
+            "error": "Internal server error"
+        }), 500
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
+    try:
+        # Test database connection
+        from sqlalchemy import text
+        db.session.execute(text("SELECT 1"))
+        db_status = "connected"
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
+        db_status = "disconnected"
+    
     return jsonify({
         "status": "healthy",
-        "service": "UPI Scam Detector API"
+        "service": "UPI Scam Detector API",
+        "database": db_status
     }), 200
 
 @app.errorhandler(404)
